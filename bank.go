@@ -5,7 +5,7 @@
 package bank
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 )
 
 type Account struct {
@@ -18,18 +18,30 @@ type history struct {
 	amt, bal int
 }
 
+var accounts map[string]*Account
+
 // NewAccount creates a new account with a name. Initial balance is 0.
 func NewAccount(s string) *Account {
-	return &Account{name: s}
+	a := &Account{name: s}
+	accounts[s] = a
+	return a
+}
+
+func GetAccount(name string) (*Account, error) {
+	accnt, ok := accounts[name]
+	if !ok {
+		return nil, errors.New("account '" + name + "' does not exist")
+	}
+	return accnt, nil
 }
 
 // Name returns the name of the account.
-func Name(a Account) string {
+func Name(a *Account) string {
 	return a.name
 }
 
 // Balance returns the current balance of account a.
-func Balance(a Account) int {
+func Balance(a *Account) int {
 	return a.bal
 }
 
