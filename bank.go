@@ -6,6 +6,7 @@ package bank
 
 import (
 	"encoding/gob"
+	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
@@ -47,6 +48,16 @@ func GetAccount(name string) (*Account, error) {
 		return nil, errors.New("account '" + name + "' does not exist")
 	}
 	return accnt, nil
+}
+
+// ListAccounts returns a formatted string that lists
+// each account and its current balance.
+func ListAccounts() string {
+	list := "Accounts:\n"
+	for _, v := range accounts {
+		list += fmt.Sprintf("Account: %s, balance: %d\n", v.Name, v.Bal)
+	}
+	return list
 }
 
 // Name returns the name of account a.
