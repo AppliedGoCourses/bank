@@ -209,7 +209,7 @@ func TestHistory(t *testing.T) {
 		{"Pike's account history", args{pike}, []int{100, 10, -40, 23}, []int{100, 110, 70, 93}, []bool{true, true, true, false}},
 	}
 	for _, tt := range tests {
-		h := History(pike)
+		h := History(&pike)
 		t.Run(tt.name, func(t *testing.T) {
 			for i := 0; i < len(pike.Hist); i++ {
 				amt, bal, more := h()
