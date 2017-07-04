@@ -20,10 +20,16 @@ func TestNewAccount(t *testing.T) {
 		{"Pike", args{"Pike"}, &Account{Name: "Pike", Bal: 0, Hist: nil}},
 		{"Thompson", args{"Thompson"}, &Account{Name: "Thompson", Bal: 0, Hist: nil}},
 	}
-	for _, tt := range tests {
+	accounts = map[string]*Account{}
+	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Ensure that the correct account is created
 			if got := NewAccount(tt.args.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewAccount() = %v, want %v", got, tt.want)
+			}
+			// Ensure each account gets inserted into accounts
+			if i+1 != len(accounts) || !reflect.DeepEqual(accounts[tt.name], tt.want) {
+				t.Errorf("len(accounts) = %v, want %v\naccounts[\"%v\"] is not %v\n", len(accounts), i+1, tt.name, tt.want)
 			}
 		})
 	}
@@ -176,10 +182,10 @@ func TestTransfer(t *testing.T) {
 				t.Errorf("Transfer() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
+			if !tt.wantErr && got != tt.want {
 				t.Errorf("Transfer() got = %v, want %v", got, tt.want)
 			}
-			if got1 != tt.want1 {
+			if !tt.wantErr && got1 != tt.want1 {
 				t.Errorf("Transfer() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
