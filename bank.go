@@ -130,8 +130,8 @@ func History(a *Account) func() (int, int, bool) {
 	}
 }
 
-// Persist the accounts map on disk.
-func Save() error {
+// Save persists the accounts map on disk.
+func Save() (err error) {
 	f, err := os.OpenFile("bank.data", os.O_WRONLY, 0666) // Note: octal #
 	if err != nil {
 		f, err = os.Create("bank.data")
@@ -139,7 +139,17 @@ func Save() error {
 			return errors.Wrap(err, "Save: Create failed")
 		}
 	}
-	defer f.Close()
+	defer func() {
+		e := f.Close()
+		if e != nil {
+			if err == nil {
+				err = e
+				return
+			}
+			err = errors.Wrap(err, e.Error())
+		}
+	}()
+
 	e := gob.NewEncoder(f)
 	err = e.Encode(accounts)
 	if err != nil {
@@ -148,7 +158,7 @@ func Save() error {
 	return nil
 }
 
-// Restore the accounts map from disk.
+// Load restores the accounts map from disk.
 func Load() error {
 	f, err := os.Open("bank.data")
 	if err != nil {
@@ -158,7 +168,7 @@ func Load() error {
 		}
 		return errors.Wrap(err, "Load: Open failed")
 	}
-	defer f.Close()
+	defer f.Close() // closing a readonly file needs no error checking
 	d := gob.NewDecoder(f)
 	err = d.Decode(&accounts)
 	if err != nil {
