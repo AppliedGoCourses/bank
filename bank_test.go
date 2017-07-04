@@ -1,12 +1,10 @@
-// Copyright 2017 Christoph Berger. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package bank
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func TestNewAccount(t *testing.T) {
@@ -18,9 +16,9 @@ func TestNewAccount(t *testing.T) {
 		args args
 		want *Account
 	}{
-		{"Griesemer", args{"Griesemer"}, &Account{name: "Griesemer", bal: 0, hist: nil}},
-		{"Pike", args{"Pike"}, &Account{name: "Pike", bal: 0, hist: nil}},
-		{"Thompson", args{"Thompson"}, &Account{name: "Thompson", bal: 0, hist: nil}},
+		{"Griesemer", args{"Griesemer"}, &Account{Name: "Griesemer", Bal: 0, Hist: nil}},
+		{"Pike", args{"Pike"}, &Account{Name: "Pike", Bal: 0, Hist: nil}},
+		{"Thompson", args{"Thompson"}, &Account{Name: "Thompson", Bal: 0, Hist: nil}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -33,10 +31,10 @@ func TestNewAccount(t *testing.T) {
 
 func TestName(t *testing.T) {
 	type args struct {
-		a Account
+		a *Account
 	}
 
-	pike := Account{"Pike", 100, nil}
+	pike := &Account{"Pike", 100, nil}
 
 	tests := []struct {
 		name string
@@ -56,9 +54,9 @@ func TestName(t *testing.T) {
 
 func TestBalance(t *testing.T) {
 	type args struct {
-		a Account
+		a *Account
 	}
-	pike := Account{"Pike", 100, nil}
+	pike := &Account{"Pike", 100, nil}
 
 	tests := []struct {
 		name string
@@ -194,7 +192,7 @@ func TestHistory(t *testing.T) {
 	}
 
 	pike := Account{"Pike", 100, nil}
-	pike.hist = []history{
+	pike.Hist = []history{
 		{100, 100},
 		{10, 110},
 		{-40, 70},
@@ -213,11 +211,41 @@ func TestHistory(t *testing.T) {
 	for _, tt := range tests {
 		h := History(pike)
 		t.Run(tt.name, func(t *testing.T) {
-			for i := 0; i < len(pike.hist); i++ {
+			for i := 0; i < len(pike.Hist); i++ {
 				amt, bal, more := h()
 				if amt != tt.wantAmt[i] || bal != tt.wantBal[i] || more != tt.wantMore[i] {
 					t.Errorf("History() = %v, %v, %v, want %v, %v, %v", amt, bal, more, tt.wantAmt[i], tt.wantBal[i], tt.wantMore[i])
 				}
+			}
+		})
+	}
+}
+
+func TestSaveAndLoad(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"SaveAndLoad"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_ = NewAccount("Hiasl")
+			if err := Save(); err != nil {
+				t.Errorf("Save() error = %v, stack = %v", err, errors.WithStack(err))
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+			accounts = nil
+			if err := Load(); err != nil {
+				t.Errorf("Load() error = %v, stack = %v", err, errors.WithStack(err))
+			}
+			if accounts == nil {
+				t.Errorf("accounts not restored: %v", accounts)
+			}
+			hiasl, ok := accounts["Hiasl"]
+			if !ok {
+				t.Errorf("accounts = %v, hiasl = %v", accounts, hiasl)
 			}
 		})
 	}
