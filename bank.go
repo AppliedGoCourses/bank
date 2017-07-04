@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package bank was made for the Master Go course at appliedgo.com.
 package bank
 
 import (
@@ -14,6 +15,10 @@ import (
 
 // Account is a bank account with a name, a balance, and a
 // transaction history.
+// The fields should be unexported and accessed via Name(), Balance(),
+// and History() only. However, `gob` enconding and
+// decoding (used by Save and Load) requires struct fields to be exported.
+
 type Account struct {
 	Name string
 	Bal  int
@@ -23,9 +28,6 @@ type Account struct {
 type history struct {
 	Amt, Bal int
 }
-
-// The fields of the above structs could be internal, too. Only for
-// gob functionality (see Save and Load), they had to be exported.
 
 var accounts map[string]*Account
 
