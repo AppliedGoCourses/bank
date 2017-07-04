@@ -23,6 +23,9 @@ type history struct {
 	Amt, Bal int
 }
 
+// The fields of the above structs could be internal, too. Only for
+// gob functionality (see Save and Load), they had to be exported.
+
 var accounts map[string]*Account
 
 // NewAccount creates a new account with a name. Initial balance is 0.
@@ -103,7 +106,7 @@ func Transfer(a, b *Account, m int) (int, int, error) {
 // On each call, the closure returns the amount of the transaction, the resulting balance,
 // and a boolean that is true as long as there are more history elements to read.
 // The closure returns the history items from oldest to newest.
-func History(a Account) func() (int, int, bool) {
+func History(a *Account) func() (int, int, bool) {
 	i := 0
 	more := true
 	return func() (int, int, bool) {
