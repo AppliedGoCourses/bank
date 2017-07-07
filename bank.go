@@ -119,10 +119,15 @@ func Transfer(a, b *Account, m int) (int, int, error) {
 // On each call, the closure returns the amount of the transaction, the resulting balance,
 // and a boolean that is true as long as there are more history elements to read.
 // The closure returns the history items from oldest to newest.
+// The closure panics if it is called again after its third return value has
+// turned "false".
 func History(a *Account) func() (int, int, bool) {
 	i := 0
 	more := true
 	return func() (int, int, bool) {
+		if len(a.Hist) == 0 {
+			return 0, 0, false
+		}
 		if i >= len(a.Hist)-1 {
 			more = false
 		}
@@ -132,7 +137,7 @@ func History(a *Account) func() (int, int, bool) {
 	}
 }
 
-// Save persists the accounts map on disk.
+// Save stores the accounts map on disk.
 func Save() (err error) {
 	f, err := os.OpenFile("bank.data", os.O_WRONLY, 0666) // Note: octal #
 	if err != nil {
