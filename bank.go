@@ -121,7 +121,7 @@ func Transfer(a, b *Account, m int) (int, int, error) {
 // The closure returns the history items from oldest to newest.
 // The closure panics if it is called again after its third return value has
 // turned "false".
-func History(a *Account) func() (int, int, bool) {
+func History(a *Account) func() (amt, bal int, more bool) {
 	i := 0
 	more := true
 	return func() (int, int, bool) {
