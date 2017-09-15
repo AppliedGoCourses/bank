@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -255,4 +256,10 @@ func TestSaveAndLoad(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleNewAccount() {
+	a := NewAccount("Test")
+	fmt.Println(Name(a))
+	// Output: Test
 }
