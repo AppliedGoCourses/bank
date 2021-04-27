@@ -9,8 +9,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 )
 
 // Account is a bank account with a name, a balance, and a
@@ -47,7 +45,7 @@ func NewAccount(s string) *Account {
 func GetAccount(name string) (*Account, error) {
 	accnt, ok := accounts[name]
 	if !ok {
-		return nil, errors.New("account '" + name + "' does not exist")
+		return nil, fmt.Errorf("account '%s' does not exist", name)
 	}
 	return accnt, nil
 }
@@ -76,7 +74,7 @@ func Balance(a *Account) int {
 // The amount must be positive.
 func Deposit(a *Account, m int) (int, error) {
 	if m < 0 {
-		return a.Bal, errors.Errorf("Deposit: amount must be positive, but is %d.", m)
+		return a.Bal, fmt.Errorf("Deposit: amount must be positive, but is %d.", m)
 	}
 	a.Bal += m
 	a.Hist = append(a.Hist, history{m, a.Bal})
@@ -87,10 +85,10 @@ func Deposit(a *Account, m int) (int, error) {
 // The amount must be positive.
 func Withdraw(a *Account, m int) (int, error) {
 	if m < 0 {
-		return a.Bal, errors.Errorf("Withdraw: amount must be positive, but is %d.", m)
+		return a.Bal, fmt.Errorf("Withdraw: amount must be positive, but is %d.", m)
 	}
 	if m > a.Bal {
-		return a.Bal, errors.Errorf("Withdraw: amount (%d) must be less than actual balance (%d).", m, a.Bal)
+		return a.Bal, fmt.Errorf("Withdraw: amount (%d) must be less than actual balance (%d).", m, a.Bal)
 	}
 	a.Bal -= m
 	a.Hist = append(a.Hist, history{-m, a.Bal})
@@ -104,9 +102,9 @@ func Withdraw(a *Account, m int) (int, error) {
 func Transfer(a, b *Account, m int) (int, int, error) {
 	switch {
 	case m < 0:
-		return a.Bal, b.Bal, errors.Errorf("Transfer: amount must be positive, but is %d.", m)
+		return a.Bal, b.Bal, fmt.Errorf("Transfer: amount must be positive, but is %d.", m)
 	case m > a.Bal:
-		return 0, a.Bal, errors.Errorf("Withdraw: amount (%d) must be less than actual balance of sending account (%d).", m, a.Bal)
+		return 0, a.Bal, fmt.Errorf("Withdraw: amount (%d) must be less than actual balance of sending account (%d).", m, a.Bal)
 	}
 	a.Bal -= m
 	b.Bal += m
@@ -143,7 +141,7 @@ func Save() (err error) {
 	if err != nil {
 		f, err = os.Create("bank.data")
 		if err != nil {
-			return errors.Wrap(err, "Save: Create failed")
+			return fmt.Errorf("Save: Create failed: %w", err)
 		}
 	}
 	defer func() {
@@ -153,14 +151,14 @@ func Save() (err error) {
 				err = e
 				return
 			}
-			err = errors.Wrap(err, e.Error())
+			err = fmt.Errorf("%s: %w", e.Error(), err)
 		}
 	}()
 
 	e := gob.NewEncoder(f)
 	err = e.Encode(accounts)
 	if err != nil {
-		return errors.Wrap(err, "Save: Encode failed")
+		return fmt.Errorf("Save: Encode failed: %w", err)
 	}
 	return nil
 }
@@ -173,13 +171,13 @@ func Load() error {
 			// Expected. The file does not exist initially.
 			return nil
 		}
-		return errors.Wrap(err, "Load: Open failed")
+		return fmt.Errorf("Load: Open failed: %w", err)
 	}
 	defer f.Close() // closing a readonly file needs no error checking
 	d := gob.NewDecoder(f)
 	err = d.Decode(&accounts)
 	if err != nil {
-		return errors.Wrap(err, "Load: Decode failed")
+		return fmt.Errorf("Load: Decode failed: %w", err)
 	}
 	return nil
 }

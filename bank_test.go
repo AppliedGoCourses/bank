@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/pkg/errors"
 )
 
 func TestNewAccount(t *testing.T) {
@@ -239,13 +237,13 @@ func TestSaveAndLoad(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = NewAccount("Hiasl")
 			if err := Save(); err != nil {
-				t.Errorf("Save() error = %v, stack = %v", err, errors.WithStack(err))
+				t.Errorf("Save() error = %v", err)
 			}
 		})
 		t.Run(tt.name, func(t *testing.T) {
 			accounts = nil
 			if err := Load(); err != nil {
-				t.Errorf("Load() error = %v, stack = %v", err, errors.WithStack(err))
+				t.Errorf("Load() error = %v", err)
 			}
 			if accounts == nil {
 				t.Errorf("accounts not restored: %v", accounts)
